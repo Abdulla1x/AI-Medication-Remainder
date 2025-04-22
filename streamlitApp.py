@@ -1,6 +1,5 @@
 import streamlit as st
 import asyncio
-import nest_asyncio
 import pandas as pd
 import os
 from main import extract_medication_details, answer_medical_question
@@ -22,6 +21,10 @@ with tab1:
                     medication_details = asyncio.run(extract_medication_details(natural_input))
                     st.success("Medication details extracted successfully!")
                     
+                    if isinstance(medication_details, dict):
+                        # Convert single dict to list
+                        medication_details = [medication_details]
+
                     # Check if the result is a list
                     if isinstance(medication_details, list):
 
@@ -37,7 +40,7 @@ with tab1:
                         st.success("Reminders have been scheduled!")
 
                     # Convert to DataFrame and save to CSV
-                    df = pd.DataFrame(medication_details)  
+                    df = pd.DataFrame(medication_details)
                     csv_file = "medications.csv"
 
                     if os.path.exists(csv_file):
