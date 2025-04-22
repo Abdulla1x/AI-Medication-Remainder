@@ -35,7 +35,6 @@ Built to help users manage their medication schedules effectively, this app leve
 - Streamlit  
 - Gemini LLM  
 - APScheduler  
-- nest_asyncio
 
 * * *
 
@@ -56,8 +55,8 @@ Built to help users manage their medication schedules effectively, this app leve
 
 - Integrating LLMs for natural language parsing.  
 - Managing scheduled tasks in Python with APScheduler.  
-- Handling async operations within Streamlit using `nest_asyncio`.
-
+- Creating a User-Friendly Interface using Streamlit.
+  
 * * *
 
 ## Future Improvements
