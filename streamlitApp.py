@@ -2,12 +2,14 @@ import streamlit as st
 import asyncio
 import pandas as pd
 import os
+import csv
 from main import extract_medication_details, answer_medical_question
 from reminder_scheduler import schedule_reminders, send_notification
+from prolog_interface import check_interaction, check_long_term_risk
 
 st.title("AI Medication Reminder 💊")
 
-tab1, tab2, tab3 = st.tabs(["📋 Schedule Reminders", "🧠 Ask a Medical Question", "🔔 Test Notification"])
+tab1, tab2, tab3, tab4 = st.tabs(["📋 Schedule Reminders", "🧠 Ask a Medical Question", "🔔 Test Notification", "⚠️ Medication Safety Check"])
 
 with tab1:
     st.subheader("Enter your medication details:")
@@ -84,3 +86,62 @@ with tab3:
             st.success("Test notification sent successfully!")
         except Exception as e:
             st.error(f"Notification failed: {e}")
+
+with tab4:
+    st.subheader("⚠️ Medication Safety Check using Prolog")
+    st.info("This tool checks for harmful drug interactions and long-term usage risks using Prolog rules.")
+
+    csv_file = "medications.csv"
+
+    if os.path.exists(csv_file):
+        df = pd.read_csv(csv_file)
+
+        if not df.empty:
+            st.write("### Current Medications:")
+            st.dataframe(df)
+
+            medications = []
+            try:
+                with open(csv_file, mode='r', newline='') as file:
+                    reader = csv.DictReader(file)
+                    for row in reader:
+                        medication = {
+                            'medication_name': row['medication_name'].strip(),
+                            'dosage': row['dosage'].strip(),
+                            'frequency': row['frequency'].strip(),
+                            'duration_days': int(row['duration_days'].strip())
+                        }
+                        medications.append(medication)
+            except Exception as e:
+                st.error(f"Failed to read CSV file: {e}")
+
+            st.markdown("### 🚨 Drug Interactions")
+            found_interaction = False
+            for i in range(len(medications)):
+                for j in range(i + 1, len(medications)):
+                    med1 = medications[i]["medication_name"]
+                    med2 = medications[j]["medication_name"]
+                    try:
+                        if check_interaction(med1, med2):
+                            st.warning(f"⚠️ Interaction detected between **{med1}** and **{med2}**")
+                            found_interaction = True
+                    except Exception as e:
+                        st.error(f"Error checking interaction between {med1} and {med2}: {e}")
+            if not found_interaction:
+                st.success("✅ No harmful interactions detected.")
+
+            st.markdown("### 🧪 Long-Term Usage Risk")
+            for med in medications:
+                name = med["medication_name"]
+                duration = int(med["duration_days"])
+                try:
+                    if check_long_term_risk(name, duration):
+                        st.warning(f"⚠️ **{name}** taken for **{duration} days** may pose long-term health risks.")
+                    else:
+                        st.info(f"✅ **{name}** is safe for {duration} days.")
+                except Exception as e:
+                    st.error(f"Error checking risk for {name}: {e}")
+        else:
+            st.warning("No medications found in CSV. Please enter medication details first.")
+    else:
+        st.warning("No medication data found. Submit details in the first tab to run safety checks.")
