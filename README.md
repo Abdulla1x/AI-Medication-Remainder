@@ -75,7 +75,6 @@ Built to help users manage their medication schedules effectively, this app leve
 - Integrate push notifications (e.g., email or SMS).  
 - Extend Q&A with additional medical resources and validation.
 - Expand Prolog logic with more rules and drug data.
-- Extend Q&A with additional medical resources and validation.
 
 * * *
 
